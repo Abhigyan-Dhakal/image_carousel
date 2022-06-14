@@ -77,11 +77,13 @@ class Carousel {
       this.nextBtn.addEventListener("click", () => {
         this.currentImg++;
         this.move();
+        this.resetTransition();
       });
 
       this.previousBtn.addEventListener("click", () => {
         this.currentImg--;
         this.move();
+        this.resetTransition();
       });
     };
 
@@ -102,13 +104,13 @@ class Carousel {
         this.indicatorArr[i].addEventListener("click", () => {
           this.currentImg = i;
           this.move();
+          this.resetTransition();
         });
       }
     };
 
     // Method to move the position of image wrapper based on the current image position
-    this.move = (autoTransition) => {
-      let transitionTimeout;
+    this.move = () => {
       this.checkBoundary();
       let transition = setInterval(() => {
         if (
@@ -134,14 +136,8 @@ class Carousel {
 
         // if block that executes when the image reaches its final position after transition
         if (this.distance === this.currentImg * this.container.clientWidth) {
-          // Clearing out the previous intervals and timeouts of setInterval and setTimeout function
+          // Clearing out the previous intervals of transition intervals
           clearInterval(transition);
-          clearInterval(autoTransition);
-          clearTimeout(transitionTimeout);
-          // Reassigning the setTimeout method after the image slide completes
-          transitionTimeout = setTimeout(() => {
-            this.animate();
-          }, this.holdDuration);
         }
       }, this.transitionDuration / this.container.clientWidth);
 
@@ -150,10 +146,19 @@ class Carousel {
 
     // Method to automatically animate the image carousel based on the hold duration of the instance
     this.animate = () => {
-      let autoTransition = setInterval(() => {
+      this.autoTransition = setInterval(() => {
         this.currentImg++;
-        this.move(autoTransition);
+        this.move();
       }, this.holdDuration);
+    };
+
+    // Method to reset the intervals and timeouts for slide transition
+    this.resetTransition = () => {
+      clearInterval(this.autoTransition);
+      clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = setTimeout(() => {
+        this.animate();
+      }, 0);
     };
 
     this.init();
